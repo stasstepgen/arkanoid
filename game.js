@@ -10,6 +10,7 @@ let game = {
   platform: null,
   ball: null,
   blocks: [],
+  score: 0,
   rows: 4,
   cols: 8,
   width: 640,
@@ -65,7 +66,7 @@ let game = {
       }
     }
   },
-  update(){
+  update() {
     this.collideBlocks();
     this.collidePlatform();
     this.ball.collideWorldBounds();
@@ -73,10 +74,18 @@ let game = {
     this.platform.move();
     this.ball.move();
   },
+  addScore() {
+    ++this.score;
+
+    if (this.score >= this.blocks.length) {
+        this.end("You win");
+    }
+  },
   collideBlocks(){
     for (let block of this.blocks) {
       if (block.active && this.ball.collide(block)) {
         this.ball.bumpBlock(block);
+        this.addScore();
       }
     }
   },
@@ -91,8 +100,8 @@ let game = {
         this.update();
         this.render();
         this.run();
-    });
-  }
+      });
+    }
   },
   render() {
     this.ctx.clearRect(0, 0, this.width, this.height);
@@ -104,8 +113,8 @@ let game = {
   renderBlocks() {
     for (let block of this.blocks){
       if (block.active)  {
-      this.ctx.drawImage(this.sprites.block, block.x, block.y);
-    }
+        this.ctx.drawImage(this.sprites.block, block.x, block.y);
+      }
     }
   },
   start: function() {
@@ -115,11 +124,15 @@ let game = {
         this.run();
     });
   },
+  end(message) {
+    this.running = false;
+    alert(message);
+    window.location.reload();
+  },
   random(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
 };
-
 
 game.ball = {
     dx: 0,
@@ -177,9 +190,7 @@ game.ball = {
           this.y = 0;
           this.dy = this.velocity;
         } else if (ballBottom > worldBottom) {
-          game.running = false;
-          alert("game over");
-          window.location.reload();
+            game.end("Game over");
         }
     },
     bumpBlock(block) {
